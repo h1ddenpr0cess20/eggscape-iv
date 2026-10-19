@@ -101,25 +101,27 @@ threads, so a lane is still a lane at speed.
 
 ## The soundtrack
 
-There is no audio file in the repository, and there is music. `soundtrack.js`
-writes it down — one token per sixteenth, `d2 - . d3+f3+a3` — and `music.js`
-plays it on the same AudioContext the sound effects use, on instruments made
-of oscillators and noise.
+There is no audio file in the repository, and there is an orchestra.
+`soundtrack.js` writes it down — one token per sixteenth, `d2! d2? d2 .` — and
+`music.js` plays it on the same AudioContext the sound effects use. Every
+instrument is oscillators and noise: a string section is three players a few
+cents apart with a vibrato each, bowed so it swells in; a horn is a saw whose
+filter opens as it gets louder; timpani are a tuned skin that sags as it rings.
 
-It is dark and driving and wet: a deep kick on every beat, a bass galloping on
-the offbeats, and rain the whole way through, noise ticking on the sixteenths
-loud and soft in no order a hand would choose. D minor, round Dm Dm Bb Bb Gm
-Gm A A. The A is the storm — a major chord where the key wants a minor one, its
-C sharp pulling hard back home, so the loop never quite settles before it
-starts again.
+It is D minor, a bar a chord: Dm Dm Bb Bb Gm Eb C#dim7 A. The E flat is the
+Neapolitan, a semitone above home, and the diminished seventh after it is the
+oldest storm in the book — every note a minor third from the next, so it could
+fall anywhere — until the A drags it back to D. Over it the horns play the
+*Dies Irae*, the day of wrath, which composers have reached for whenever
+something terrible was on its way. Under it the basses saw at one note in
+eighths, and the timpani keep the D and the A.
 
-It builds with distance. The first hundred metres are the kick, the bass and
-the rain. Then come the hats, the crack on the backbeat and the drops — the
-chord falling, three notes against four beats, mostly gaps — and at three
-hundred the strings, a bell a long way up and thunder rolling once every eight
-bars, and at six hundred the lead. Struck is a chord with no business in the
-key and the power going; between runs it is the chords slowed right down, a
-few drops, and thunder a long way off.
+It builds with distance, a section at a time. The first hundred metres are the
+basses, the cellos and the timpani. Then come the horns and the upper strings;
+at three hundred the trombones, the bass drum and the violins in tremolo; and
+at six hundred the choir and the violins up high. Struck is the brass falling
+off its note, a tam-tam, and a chord with no business anywhere; between runs it
+is low strings, the chant slowly on a celesta, and the choir barely there.
 
 The thunder after a lightning strike is not in the score. It is `sound.js`,
 three seconds of brown noise under a closing filter, put down on the audio
@@ -176,7 +178,7 @@ src/
     input.js            Keys and swipes → one frame of intent
     sound.js            The arcade, and the thunder
     music.js            A sequencer that reads its parts out of strings
-    soundtrack.js       The storm in D minor
+    soundtrack.js       An orchestra in D minor, and the Dies Irae
     best.js             The only thing that survives a run
 test/                 node:test, including an autopilot that proves seeds are fair
 ```

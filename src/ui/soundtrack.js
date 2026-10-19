@@ -1,258 +1,350 @@
 import { hit, hold, rest, shape } from './music.js';
 
 /**
- * Eggscape the Storm: dark, driving, and wet. A deep kick on every beat, a
- * bass galloping on the offbeats under it, and rain all the way through —
- * noise ticking on the sixteenths, never twice the same way in a bar.
+ * Eggscape the Storm: an orchestra, playing as if the sky were coming down.
  *
- * D minor, round Dm Dm Bb Bb Gm Gm A A. The A is the storm: a major chord
- * where the key wants a minor one, its C sharp pulling hard back home, so
- * the loop never quite settles before it starts again.
+ * D minor, a bar a chord: Dm Dm Bb Bb Gm Eb C#dim7 A. The E flat is the
+ * Neapolitan — a semitone above home, where dread lives — and the diminished
+ * seventh after it is the oldest storm in the book, every note of it a minor
+ * third from the next, so it could fall anywhere. The A drags it back to D.
+ *
+ * Over that, the horns play the Dies Irae, the day of wrath, which composers
+ * have reached for whenever something terrible was on its way: F E F D E C D
+ * D. Under it, the basses saw at one note like something that will not stop,
+ * and the timpani keep the D and the A as timpani always have.
+ *
+ * It builds with distance, a section at a time: basses, cellos and timpani
+ * first; then the horns and the upper strings; then trombones, the bass drum
+ * and the violins shaking on their strings; and last the choir and the violins
+ * up high.
  */
 
-const CHORDS = [
-  { root: 'd2', pad: 'd3+f3+a3', drops: ['a5', 'f5', 'd5'] },
-  { root: 'd2', pad: 'd3+f3+a3', drops: ['a5', 'f5', 'd5'], turn: 'd3' },
-  { root: 'bb1', pad: 'd3+f3+bb3', drops: ['f5', 'd5', 'bb4'] },
-  { root: 'bb1', pad: 'd3+f3+bb3', drops: ['f5', 'd5', 'bb4'], turn: 'bb2' },
-  { root: 'g1', pad: 'd3+g3+bb3', drops: ['d5', 'bb4', 'g4'] },
-  { root: 'g1', pad: 'd3+g3+bb3', drops: ['d5', 'bb4', 'g4'], turn: 'g2' },
-  { root: 'a1', pad: 'c#3+e3+a3', drops: ['e5', 'c#5', 'a4'] },
-  { root: 'a1', pad: 'c#3+e3+a3', drops: ['e5', 'c#5', 'a4'], turn: 'a2' },
+const BARS = [
+  { root: 'd2', low: 'd2+a2', mid: 'd3+f3+a3', high: 'a3+d4+f4', choir: 'f3+a3+d4', brass: 'd3+a3', violin: 'a4+d5' },
+  { root: 'd2', low: 'd2+a2', mid: 'd3+f3+a3', high: 'a3+d4+f4', choir: 'f3+a3+d4', brass: 'd3+a3', violin: 'a4+f5' },
+  { root: 'bb1', low: 'bb1+f2', mid: 'd3+f3+bb3', high: 'bb3+d4+f4', choir: 'f3+bb3+d4', brass: 'bb2+f3', violin: 'bb4+d5' },
+  { root: 'bb1', low: 'bb1+f2', mid: 'd3+f3+bb3', high: 'bb3+d4+f4', choir: 'f3+bb3+d4', brass: 'bb2+f3', violin: 'bb4+f5' },
+  { root: 'g1', low: 'g1+d2', mid: 'd3+g3+bb3', high: 'bb3+d4+g4', choir: 'g3+bb3+d4', brass: 'g2+d3', violin: 'bb4+g5' },
+  { root: 'eb2', low: 'eb2+bb2', mid: 'eb3+g3+bb3', high: 'bb3+eb4+g4', choir: 'g3+bb3+eb4', brass: 'eb3+bb3', violin: 'bb4+g5' },
+  { root: 'c#2', low: 'c#2+g2', mid: 'e3+g3+bb3', high: 'bb3+c#4+e4', choir: 'g3+bb3+e4', brass: 'c#3+g3', violin: 'bb4+e5' },
+  { root: 'a1', low: 'a1+e2', mid: 'c#3+e3+a3', high: 'a3+c#4+e4', choir: 'e3+a3+c#4', brass: 'a2+e3', violin: 'a4+c#5' },
 ];
 
-const each = (write) => CHORDS.map(write).join(' | ');
+const each = (write) => BARS.map(write).join(' | ');
 
-/** Off every beat, and the sixteenth after it: a gallop. A turn jumps the
- *  octave at the end of the bar. */
-const gallop = ({ root, turn }) => {
-  const beat = `. . ${root} ${root}`;
-  return [beat, beat, beat, turn ? `. . ${turn} ${root}` : beat].join(' ');
-};
+/** The basses, sawing at the root in eighths with a kick at the front of
+ *  each half bar: the thing that will not stop. */
+const sawing = ({ root }) => `${root}! ${root}? ${root} . ${root} . ${root} . ${root}! ${root}? ${root} . ${root} . ${root} .`;
 
-/** The drops: the chord falling, three notes against four beats, so they
- *  never land the same way twice in a bar — and mostly gaps, like rain. */
-const falling = ({ drops }) => Array.from({ length: 16 }, (_, i) => {
-  if (i % 3 === 2) return '.';
-  return drops[i % 3] + (i % 4 ? '?' : '');
-}).join(' ');
-
-const FOUR = 'x . . . x . . . x . . . x . . .';
-
-/** Rain on a roof: sixteenths, loud and soft in no order a hand would choose. */
-const PATTER = [
-  'o x o o x o o x o o x o x o o x',
-  'o o x o x o o x o x o o x o x x',
+/** Timpani on the D and the A, as they have always been tuned — and a roll
+ *  that swells on the last bar, into the top again. */
+const TIMPANI = [
+  'd2! . . . . . . . a1 . . . . . . .',
+  'd2! . . . . . . . a1 . . . a1 . . .',
+  'd2! . . . . . . . a1 . . . . . . .',
+  'd2! . . . . . . . a1 . . . a1 . . .',
+  'd2! . . . . . . . a1 . . . . . . .',
+  'd2! . . . . . . . a1 . . . a1 . . .',
+  'a1! . . . . . . . a1 . . . a1 . . .',
+  'a1? a1? a1? a1? a1? a1? a1? a1? a1 a1 a1 a1 a1! a1! a1! a1!',
 ].join(' | ');
 
-const LEAD = [
-  'a4 - - - d5 - - - f5 - e5 - d5 - - -',
-  'c5 - - - d5 - - - a4 - - - - - - -',
-  'bb4 - - - d5 - - - f5 - g5 - f5 - - -',
-  'd5 - - - f5 - - - bb4 - - - - - - -',
-  'g4 - - - bb4 - - - d5 - c5 - bb4 - - -',
-  'a4 - - - bb4 - - - g4 - - - - - - -',
-  'e5 - - - c#5 - - - e5 - g5 - f5 - - -',
-  'e5 - - - c#5 - - - a4 - - - - - - -',
+/** Dies irae, dies illa — and the horns carry on past where the chant
+ *  stops, into the dark of the last four bars. */
+const DIES_IRAE = [
+  'f4 - - - e4 - - - f4 - - - d4 - - -',
+  'e4 - - - c4 - - - d4 - - . d4 - - -',
+  'f4 - - - f4 - - - g4 - - - f4 - - -',
+  'd4 - - - bb3 - - - d4 - - - - - - -',
+  rest(16),
+  'eb4 - - - - - - - - - - - bb3 - - -',
+  'g4 - - - - - - - e4 - - - - - - -',
+  'e4 - - - - - - - c#4 - - - - - - -',
 ].join(' | ');
 
-/** The title: the same chords slowed right down, a few drops, and thunder a
- *  long way off. */
-const DRIFT = [
-  '. . . . a5 . . . . . d6 . . . . .',
-  '. . f5 . . . . . . . . . a5 . . .',
-  '. . . . f5 . . . . . bb5 . . . . .',
-  '. . d6 . . . . . . . . . . . f5 .',
-  '. . . . d5 . . . . . g5 . . . . .',
-  '. . bb5 . . . . . . . . . d6 . . .',
-  '. . . . e5 . . . . . a5 . . . . .',
-  '. . c#6 . . . . . . . . . e5 . . .',
+/** The violins up high, in long notes, falling where the horns rise. */
+const DESCANT = [
+  'a5 - - - - - - - - - - - g5 - f5 -',
+  'e5 - - - - - - - d5 - - - - - - -',
+  'd5 - - - - - - - f5 - - - - - - -',
+  'bb5 - - - - - - - a5 - - - g5 - - -',
+  'g5 - - - - - - - - - - - bb5 - a5 -',
+  'g5 - - - - - - - eb5 - - - - - - -',
+  'e5 - - - - - - - g5 - - - bb5 - - -',
+  'a5 - - - - - - - - - - - c#5 - e5 -',
 ].join(' | ');
+
+/** The title: the chant on a celesta, slowly, as if from a music box left
+ *  out in the rain. */
+const MUSIC_BOX = [
+  'f5 . . . e5 . . . f5 . . . d5 . . .',
+  'e5 . . . c5 . . . d5 . . . d5 . . .',
+  rest(16),
+  rest(16),
+  'f5 . . . f5 . . . g5 . . . f5 . . .',
+  'e5 . . . d5 . . . c#5 . . . d5 . . .',
+  rest(16),
+  rest(16),
+].join(' | ');
+
+/** And the title's own harmony, slower: two bars a chord. */
+const SLOW = ['d2+a2', 'd2+a2', 'bb1+f2', 'bb1+f2', 'g1+d2', 'g1+d2', 'a1+e2', 'a1+e2'];
+const SLOW_UPPER = ['d3+f3+a3', 'd3+f3+a3', 'd3+f3+bb3', 'd3+f3+bb3', 'd3+g3+bb3', 'd3+g3+bb3', 'c#3+e3+a3', 'c#3+e3+a3'];
 
 function instruments({ voice }) {
-  let lastLead = null;
+  let lastViolin = null;
+
+  /**
+   * A string section: for every note, three players a few cents apart, each
+   * with a vibrato of their own, bowed — so it swells in rather than starts —
+   * and through a body that takes the fizz off the saws.
+   */
+  function section(note, freqs, { bright = 2400, players = 3, spread = 9 }) {
+    const body = note.filter('lowpass', bright, 0.6);
+    const floor = note.filter('highpass', 70, 0.5);
+    body.connect(floor);
+    for (const freq of freqs) {
+      for (let p = 0; p < players; p++) {
+        const cents = (p - (players - 1) / 2) * spread;
+        const osc = note.osc('sawtooth', freq, cents);
+        note.wobble(osc.detune, 5 + p * 0.37, 9, 0.35);
+        osc.connect(body);
+      }
+    }
+    return floor;
+  }
 
   return {
-    /** Deep and round, with a little air on the front of it. */
-    kick(out, t, _dur, _freqs, vel) {
+    /** Sustained strings, bowed: slow in, and a long release into the hall. */
+    strings(out, t, dur, freqs, vel) {
       const note = voice(t);
-      const body = note.osc('sine', 120);
-      body.frequency.exponentialRampToValueAtTime(38, t + 0.13);
+      const sound = section(note, freqs, { bright: 2200 });
+      const amp = note.gain();
+      sound.connect(amp).connect(out);
+      note.play(shape(amp.gain, t, dur, {
+        peak: (0.16 * vel) / freqs.length, attack: 0.5, decay: 1.2, sustain: 0.85, release: 0.9,
+      }));
+    },
+
+    /** The low strings, darker. */
+    cellos(out, t, dur, freqs, vel) {
+      const note = voice(t);
+      const sound = section(note, freqs, { bright: 1100 });
+      const amp = note.gain();
+      sound.connect(amp).connect(out);
+      note.play(shape(amp.gain, t, dur, {
+        peak: (0.22 * vel) / freqs.length, attack: 0.6, decay: 1.5, sustain: 0.9, release: 1.1,
+      }));
+    },
+
+    /** Tremolo: the bow shaking on the string, the sound of a storm in every
+     *  film since there were films. */
+    tremolo(out, t, dur, freqs, vel) {
+      const note = voice(t);
+      const sound = section(note, freqs, { bright: 3000, players: 2 });
+      const shake = note.gain(0.55);
+      note.wobble(shake.gain, 13, 0.45);
+      const amp = note.gain();
+      sound.connect(shake).connect(amp).connect(out);
+      note.play(shape(amp.gain, t, dur, {
+        peak: (0.14 * vel) / freqs.length, attack: 0.9, decay: 1, sustain: 0.9, release: 0.6,
+      }));
+    },
+
+    /** Basses, played short and hard, near the frog. */
+    basses(out, t, _dur, [freq], vel) {
+      const note = voice(t);
+      const body = note.filter('lowpass', 500 + 500 * vel, 1.2);
+      for (const cents of [-8, 0, 8]) note.osc('sawtooth', freq, cents).connect(body);
       const amp = note.gain();
       body.connect(amp).connect(out);
-      const click = note.noise();
-      const bite = note.filter('highpass', 3200);
-      const clickAmp = note.gain();
-      click.connect(bite).connect(clickAmp).connect(out);
-      hit(clickAmp.gain, t, 0.01, 0.2 * vel);
-      note.play(hit(amp.gain, t, 0.42, 1 * vel));
+      note.play(hit(amp.gain, t, 0.2, 0.32 * vel, 0.012));
     },
 
-    /** A crack, like a branch going: a clap with a lot of room behind it. */
-    crack(out, t, _dur, _freqs, vel) {
+    /** The violins up high, sliding a little into each note, as a section
+     *  does when it is playing its heart out. */
+    violins(out, t, dur, [freq], vel) {
       const note = voice(t);
-      const src = note.noise();
-      const band = note.filter('bandpass', 1900, 0.7);
-      const amp = note.gain();
-      src.connect(band).connect(amp).connect(out);
-      for (let i = 0; i < 3; i++) {
-        amp.gain.setValueAtTime(0.8 * vel, t + i * 0.009);
-        amp.gain.setTargetAtTime(0.1, t + i * 0.009, 0.003);
+      const from = lastViolin && Math.abs(Math.log2(lastViolin / freq)) < 1 ? lastViolin : freq;
+      lastViolin = freq;
+      const body = note.filter('lowpass', 3400, 0.7);
+      for (const cents of [-10, -3, 4, 11]) {
+        const osc = note.osc('sawtooth', from, cents);
+        osc.frequency.exponentialRampToValueAtTime(freq, t + 0.12);
+        note.wobble(osc.detune, 5.4 + cents * 0.03, 14, 0.4);
+        osc.connect(body);
       }
-      amp.gain.setValueAtTime(0.85 * vel, t + 0.027);
-      amp.gain.setTargetAtTime(0, t + 0.027, 0.07);
-      note.play(t + 0.45);
-    },
-
-    hat(out, t, _dur, _freqs, vel) {
-      const note = voice(t);
-      const src = note.noise();
-      const air = note.filter('highpass', 8000);
       const amp = note.gain();
-      src.connect(air).connect(amp).connect(out);
-      note.play(hit(amp.gain, t, vel > 1.2 ? 0.18 : 0.035, 0.45 * Math.min(vel, 1)));
-    },
-
-    /** One drop of rain: a short click of filtered noise, somewhere high. */
-    patter(out, t, _dur, _freqs, vel) {
-      const note = voice(t);
-      const src = note.noise();
-      const band = note.filter('bandpass', 5200 + vel * 3000, 2.2);
-      const amp = note.gain();
-      src.connect(band).connect(amp).connect(out);
-      note.play(hit(amp.gain, t, 0.018, 0.55 * vel));
-    },
-
-    /** A saw and a sine under a filter that opens on every note and closes
-     *  before the next, so the gallop has a front edge to it. */
-    bass(out, t, dur, [freq], vel) {
-      const note = voice(t);
-      const low = note.filter('lowpass', 150, 5);
-      low.frequency.linearRampToValueAtTime(620 * vel, t + 0.01);
-      low.frequency.setTargetAtTime(140, t + 0.01, 0.05);
-      for (const cents of [-7, 7]) note.osc('sawtooth', freq, cents).connect(low);
-      const body = note.osc('sine', freq);
-      const bodyAmp = note.gain(0.7);
-      body.connect(bodyAmp).connect(low);
-      const amp = note.gain();
-      low.connect(amp).connect(out);
-      note.play(shape(amp.gain, t, dur * 0.85, {
-        peak: 0.5 * vel, attack: 0.004, decay: 0.12, sustain: 0.55, release: 0.04,
+      body.connect(amp).connect(out);
+      note.play(shape(amp.gain, t, dur, {
+        peak: 0.085 * vel, attack: 0.35, decay: 1, sustain: 0.85, release: 0.7,
       }));
     },
 
-    /** A drop of light landing: a sine with a glassy edge, gone at once. */
-    drip(out, t, _dur, [freq], vel) {
+    /**
+     * Brass: a saw whose filter opens as the note swells, which is what makes
+     * a horn a horn and not an organ — it gets brighter as it gets louder.
+     */
+    horns(out, t, dur, freqs, vel) {
       const note = voice(t);
-      const src = note.osc('sine', freq * 1.02);
-      src.frequency.exponentialRampToValueAtTime(freq, t + 0.03);
-      const edge = note.osc('triangle', freq * 3);
-      const edgeAmp = note.gain(0.08);
-      edge.connect(edgeAmp);
-      const amp = note.gain();
-      src.connect(amp);
-      edgeAmp.connect(amp);
-      amp.connect(out);
-      note.play(hit(amp.gain, t, 0.22, 0.32 * vel));
-    },
-
-    /** Strings, nearly: three saws a little apart, slow in and slow out. */
-    pad(out, t, dur, freqs, vel) {
-      const note = voice(t);
-      const low = note.filter('lowpass', 1100, 0.9);
-      note.wobble(low.frequency, 0.09, 320);
+      const bell = note.filter('lowpass', 350, 1.5);
+      bell.frequency.linearRampToValueAtTime(900 + 900 * vel, t + 0.18);
+      bell.frequency.setTargetAtTime(700 + 500 * vel, t + 0.2, 0.4);
       for (const freq of freqs) {
-        for (const cents of [-12, 0, 12]) note.osc('sawtooth', freq, cents).connect(low);
+        for (const cents of [-5, 5]) {
+          const osc = note.osc('sawtooth', freq, cents);
+          note.wobble(osc.detune, 4.8, 5, 0.5);
+          osc.connect(bell);
+        }
       }
       const amp = note.gain();
-      low.connect(amp).connect(out);
+      bell.connect(amp).connect(out);
       note.play(shape(amp.gain, t, dur, {
-        peak: (0.2 * vel) / freqs.length, attack: 0.9, decay: 1, sustain: 0.85, release: 1.4,
+        peak: (0.2 * vel) / freqs.length, attack: 0.09, decay: 0.8, sustain: 0.75, release: 0.35,
       }));
     },
 
-    /** A square and a triangle, sliding in from wherever it last was, with
-     *  a slow vibrato that only arrives on the long notes. */
-    lead(out, t, dur, [freq], vel) {
+    /** Trombones: the same, lower, and hit hard — a blow, then let ring. */
+    trombones(out, t, dur, freqs, vel) {
       const note = voice(t);
-      const low = note.filter('lowpass', 2200, 1.4);
-      const from = lastLead && Math.abs(Math.log2(lastLead / freq)) < 1 ? lastLead : freq;
-      lastLead = freq;
-      for (const [type, cents] of [['square', 0], ['triangle', -5]]) {
-        const osc = note.osc(type, from, cents);
-        osc.frequency.exponentialRampToValueAtTime(freq, t + 0.06);
-        note.wobble(osc.detune, 5, 16, 0.3);
-        osc.connect(low);
+      const bell = note.filter('lowpass', 400, 2);
+      bell.frequency.linearRampToValueAtTime(1600 * vel, t + 0.05);
+      bell.frequency.setTargetAtTime(500, t + 0.06, 0.25);
+      for (const freq of freqs) {
+        for (const cents of [-6, 6]) note.osc('sawtooth', freq, cents).connect(bell);
       }
       const amp = note.gain();
-      low.connect(amp).connect(out);
+      bell.connect(amp).connect(out);
       note.play(shape(amp.gain, t, dur, {
-        peak: 0.24 * vel, attack: 0.03, decay: 0.3, sustain: 0.7, release: 0.25,
+        peak: (0.3 * vel) / freqs.length, attack: 0.03, decay: 0.35, sustain: 0.4, release: 0.5,
       }));
     },
 
-    /** A bell, a long way up: two sines a ratio apart, ringing out. */
-    bell(out, t, _dur, [freq], vel) {
+    /** A kettle drum: a tuned skin that sags a little in pitch as it rings,
+     *  and the thud of the stick. */
+    timpani(out, t, _dur, [freq], vel) {
       const note = voice(t);
-      const src = note.osc('sine', freq);
-      const partial = note.osc('sine', freq * 2.76);
-      const partialAmp = note.gain(0.25);
-      partial.connect(partialAmp);
+      const skin = note.osc('sine', freq * 1.04);
+      skin.frequency.exponentialRampToValueAtTime(freq, t + 0.08);
+      const over = note.osc('sine', freq * 1.5);
+      const overAmp = note.gain();
+      over.connect(overAmp);
+      hit(overAmp.gain, t, 0.4, 0.3 * vel);
       const amp = note.gain();
-      src.connect(amp);
-      partialAmp.connect(amp);
+      skin.connect(amp);
+      overAmp.connect(amp);
       amp.connect(out);
-      note.play(hit(amp.gain, t, 0.6, 0.22 * vel));
+      const stick = note.noise();
+      const thud = note.filter('lowpass', 420, 0.8);
+      const stickAmp = note.gain();
+      stick.connect(thud).connect(stickAmp).connect(out);
+      hit(stickAmp.gain, t, 0.06, 0.6 * vel);
+      note.play(hit(amp.gain, t, 1.3, 0.7 * vel, 0.003));
     },
 
-    sub(out, t, dur, [freq], vel) {
+    /** The bass drum, the big one, hit once a bar and felt more than heard. */
+    drum(out, t, _dur, _freqs, vel) {
       const note = voice(t);
-      const src = note.osc('sine', freq);
+      const skin = note.osc('sine', 58);
+      skin.frequency.exponentialRampToValueAtTime(38, t + 0.6);
       const amp = note.gain();
-      src.connect(amp).connect(out);
+      skin.connect(amp).connect(out);
+      const air = note.noise();
+      const low = note.filter('lowpass', 220, 0.7);
+      const airAmp = note.gain();
+      air.connect(low).connect(airAmp).connect(out);
+      hit(airAmp.gain, t, 0.7, 0.4 * vel, 0.004);
+      note.play(hit(amp.gain, t, 1.4, 0.75 * vel, 0.004));
+    },
+
+    /** A tam-tam: a great gong, struck once, with partials that do not
+     *  agree with each other or with anything else. */
+    gong(out, t, _dur, [freq], vel) {
+      const note = voice(t);
+      const amp = note.gain();
+      for (const [ratio, level, ring] of [[1, 0.6, 5], [1.41, 0.45, 4.5], [2.13, 0.4, 4], [2.98, 0.3, 3], [4.37, 0.18, 2.4]]) {
+        const osc = note.osc('sine', freq * ratio);
+        const partial = note.gain();
+        osc.connect(partial).connect(amp);
+        hit(partial.gain, t, ring, level, 0.02);
+      }
+      const wash = note.noise();
+      const band = note.filter('bandpass', 1800, 0.6);
+      const washAmp = note.gain();
+      wash.connect(band).connect(washAmp).connect(amp);
+      shape(washAmp.gain, t, 0.3, { peak: 0.25, attack: 0.3, decay: 3, sustain: 0, release: 1 });
+      amp.connect(out);
+      note.play(hit(amp.gain, t, 6, 0.3 * vel, 0.01));
+    },
+
+    /** Voices with no words: saws through the formants of an "ah", every
+     *  singer with a vibrato of their own. */
+    choir(out, t, dur, freqs, vel) {
+      const note = voice(t);
+      const mouth = note.gain(1);
+      for (const freq of freqs) {
+        for (const cents of [-7, 0, 7]) {
+          const osc = note.osc('sawtooth', freq, cents);
+          note.wobble(osc.detune, 4.6 + cents * 0.05, 14, 0.8);
+          osc.connect(mouth);
+        }
+      }
+      const amp = note.gain();
+      for (const [f, q, level] of [[700, 7, 1], [1150, 8, 0.6], [2600, 9, 0.18]]) {
+        const formant = note.filter('bandpass', f, q);
+        const formantAmp = note.gain(level);
+        mouth.connect(formant).connect(formantAmp).connect(amp);
+      }
+      amp.connect(out);
       note.play(shape(amp.gain, t, dur, {
-        peak: 0.55 * vel, attack: 0.6, decay: 1, sustain: 0.9, release: 1.4,
+        peak: (0.42 * vel) / freqs.length, attack: 1.2, decay: 1.5, sustain: 0.85, release: 1.6,
       }));
     },
 
-    /** Thunder, a long way off: low noise, swelling and dying. */
-    roll(out, t, _dur, _freqs, vel) {
+    /** A celesta: little hammers on steel bars, sweet and a bit wrong. */
+    celesta(out, t, _dur, [freq], vel) {
       const note = voice(t);
-      const src = note.noise();
-      const low = note.filter('lowpass', 260, 0.8);
-      low.frequency.exponentialRampToValueAtTime(90, t + 2.4);
       const amp = note.gain();
-      src.connect(low).connect(amp).connect(out);
-      note.play(shape(amp.gain, t, 1.2, {
-        peak: 0.9 * vel, attack: 0.25, decay: 1.2, sustain: 0.4, release: 1.2,
-      }));
+      for (const [ratio, level, ring] of [[1, 1, 1.6], [2, 0.3, 0.8], [4.02, 0.12, 0.35]]) {
+        const osc = note.osc('sine', freq * ratio);
+        const partial = note.gain();
+        osc.connect(partial).connect(amp);
+        hit(partial.gain, t, ring, level, 0.002);
+      }
+      amp.connect(out);
+      note.play(hit(amp.gain, t, 1.8, 0.2 * vel, 0.002));
     },
 
-    /** Everything going out at once, which is what being struck is. */
+    /** Everything going out at once, which is what being struck is: the
+     *  brass falling off its note. */
     drop(out, t, dur, [freq], vel) {
       const note = voice(t);
-      const src = note.osc('sawtooth', freq);
-      src.frequency.exponentialRampToValueAtTime(freq / 8, t + dur);
-      const low = note.filter('lowpass', 2000, 3);
-      low.frequency.exponentialRampToValueAtTime(120, t + dur);
+      const bell = note.filter('lowpass', 1800, 2);
+      bell.frequency.exponentialRampToValueAtTime(120, t + dur);
+      for (const cents of [-6, 6]) {
+        const osc = note.osc('sawtooth', freq, cents);
+        osc.frequency.exponentialRampToValueAtTime(freq / 4, t + dur);
+        osc.connect(bell);
+      }
       const amp = note.gain();
-      src.connect(low).connect(amp).connect(out);
+      bell.connect(amp).connect(out);
       note.play(shape(amp.gain, t, dur, {
-        peak: 0.32 * vel, attack: 0.005, decay: dur, sustain: 0.6, release: 0.3,
+        peak: 0.3 * vel, attack: 0.02, decay: dur, sustain: 0.6, release: 0.6,
       }));
     },
   };
 }
 
 export const SOUNDTRACK = {
-  volume: 0.22,
+  volume: 0.24,
   space: {
-    reverb: { seconds: 3.2, decay: 2.6, level: 1 },
-    echo: { beats: 0.75, feedback: 0.45, tone: 2200 },
+    /** A cathedral, more or less: long, and dark at the top. */
+    reverb: { seconds: 4.5, decay: 2.4, level: 1.1 },
+    echo: { beats: 1, feedback: 0.3, tone: 1400 },
   },
   instruments,
 
-  /** The further into the storm, the more of the track is playing. */
+  /** The further into the storm, the more of the orchestra is playing. */
   level(snapshot) {
     if (snapshot.state !== 'running') return 0;
     const depth = snapshot.distance;
@@ -260,45 +352,47 @@ export const SOUNDTRACK = {
   },
 
   cues: {
+    /** Between runs: low strings, the chant on a celesta, the choir barely
+     *  there, and a gong once round. */
     title: {
-      bpm: 84,
+      bpm: 60,
       parts: [
-        { play: 'pad', gain: 1.25, wet: 0.55, notes: each(({ pad }) => hold(pad, 16)) },
-        { play: 'sub', gain: 0.2, notes: each(({ root }) => hold(root, 16)) },
-        { play: 'drip', gain: 1.6, echo: 0.6, wet: 0.35, pan: -0.2, notes: DRIFT },
-        { play: 'patter', gain: 0.5, pan: 0.3, wet: 0.3, notes: PATTER },
-        { play: 'roll', gain: 0.6, wet: 0.5, notes: `x ${rest(63)} ${rest(48)} o ${rest(15)}` },
+        { play: 'cellos', gain: 1, wet: 0.5, notes: SLOW.map((chord) => hold(chord, 16)).join(' | ') },
+        { play: 'strings', gain: 0.6, wet: 0.6, notes: SLOW_UPPER.map((chord) => hold(chord, 16)).join(' | ') },
+        { play: 'celesta', gain: 1.4, wet: 0.6, echo: 0.35, pan: -0.2, notes: MUSIC_BOX },
+        { play: 'choir', gain: 0.5, wet: 0.7, notes: `${rest(64)} ${hold('f3+a3+d4', 32)} ${hold('e3+a3+c#4', 32)}` },
+        { play: 'timpani', gain: 0.5, wet: 0.5, notes: `d2 ${rest(63)} a1 ${rest(63)}` },
+        { play: 'gong', gain: 0.5, wet: 0.6, notes: `d2 ${rest(127)}` },
       ],
     },
 
     run: {
-      bpm: 126,
+      bpm: 104,
       parts: [
-        { play: 'kick', gain: 0.58, notes: FOUR },
-        { play: 'bass', gain: 0.3, notes: each(gallop) },
-        { play: 'patter', gain: 0.75, pan: 0.25, wet: 0.2, notes: PATTER },
-        { play: 'hat', gain: 1.3, at: 1, pan: -0.2, notes: '. . x . . . x . . . x . . . X .' },
-        { play: 'crack', gain: 1.8, at: 1, wet: 0.45, notes: '. . . . x . . . . . . . x . . .' },
-        { play: 'drip', gain: 0.9, at: 1, echo: 0.45, pan: -0.35, notes: each(falling) },
-        { play: 'pad', gain: 0.8, at: 2, wet: 0.5, notes: each(({ pad }) => hold(pad, 16)) },
-        {
-          play: 'bell', gain: 1.2, at: 2, echo: 0.55, wet: 0.3, pan: 0.4,
-          notes: '. . . . . . . a5 . . . . . . d6 . | . . . f5 . . . . . . . . . . . .',
-        },
-        { play: 'roll', gain: 0.45, at: 2, wet: 0.4, notes: `x ${rest(127)}` },
-        { play: 'lead', gain: 0.42, at: 3, wet: 0.35, echo: 0.3, notes: LEAD },
+        { play: 'basses', gain: 1, pan: 0.15, wet: 0.2, notes: each(sawing) },
+        { play: 'cellos', gain: 0.9, wet: 0.35, pan: 0.1, notes: each(({ low }) => hold(low, 16)) },
+        { play: 'timpani', gain: 0.8, wet: 0.4, notes: TIMPANI },
+        { play: 'horns', gain: 1, at: 1, wet: 0.45, pan: -0.25, notes: DIES_IRAE },
+        { play: 'strings', gain: 0.9, at: 1, wet: 0.45, pan: -0.1, notes: each(({ mid }) => hold(mid, 16)) },
+        { play: 'trombones', gain: 0.9, at: 2, wet: 0.45, pan: 0.25, notes: each(({ brass }) => `${hold(brass, 6)} ${rest(10)}`) },
+        { play: 'drum', gain: 0.8, at: 2, wet: 0.5, notes: 'x . . . . . . . . . . . . . . .' },
+        { play: 'tremolo', gain: 0.8, at: 2, wet: 0.45, pan: 0.3, notes: each(({ high }) => hold(high, 16)) },
+        { play: 'choir', gain: 0.75, at: 3, wet: 0.6, notes: each(({ choir }) => hold(choir, 16)) },
+        { play: 'violins', gain: 1, at: 3, wet: 0.5, echo: 0.15, pan: -0.3, notes: DESCANT },
       ],
     },
 
-    /** Struck: a chord with no business in the key, and the power going. */
+    /** Struck: the brass falling off its note, the gong, the timpani, and a
+     *  chord with no business anywhere. */
     over: {
-      bpm: 126,
+      bpm: 104,
       once: true,
       then: 'title',
       parts: [
-        { play: 'drop', gain: 0.8, wet: 0.45, notes: `${hold('d4', 16)} ${rest(16)}` },
-        { play: 'pad', gain: 0.8, wet: 0.6, notes: `${hold('d3+f3+ab3', 16)} ${rest(16)}` },
-        { play: 'roll', gain: 1, wet: 0.5, notes: `X ${rest(31)}` },
+        { play: 'drop', gain: 0.9, wet: 0.5, notes: `${hold('d3+a3', 16)} ${rest(16)}` },
+        { play: 'strings', gain: 1, wet: 0.7, notes: `${hold('d3+eb3+ab3', 24)} ${rest(8)}` },
+        { play: 'gong', gain: 1, wet: 0.6, notes: `d2 ${rest(31)}` },
+        { play: 'timpani', gain: 1, wet: 0.5, notes: `d2! . . . a1 . . . d2 . . . . . . . ${rest(16)}` },
       ],
     },
   },
