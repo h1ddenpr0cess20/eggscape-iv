@@ -1,0 +1,222 @@
+:root {
+  --light: #f3f5f9;
+  --silver: #9aa1ac;
+  --ash: #5b616b;
+  --glow: 0 0 10px rgba(235, 240, 250, 0.45);
+  --type: "Helvetica Neue", "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: #000;
+  color: var(--light);
+  font-family: var(--type);
+  font-weight: 300;
+  overflow: hidden;
+  overscroll-behavior: none;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#stage {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* The dark at the edges, and a little grain in it, like a long exposure. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 3;
+  background:
+    radial-gradient(ellipse at 50% 45%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.7) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+#hud {
+  position: fixed;
+  inset: max(14px, env(safe-area-inset-top)) 14px auto 14px;
+  z-index: 2;
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  text-shadow: var(--glow);
+}
+
+.readout { display: flex; align-items: baseline; gap: 8px; }
+.readout .label { color: var(--silver); }
+.readout b { font-weight: 500; font-variant-numeric: tabular-nums; }
+#shells { letter-spacing: 0.14em; }
+#shells .spent { color: rgba(154, 161, 172, 0.3); text-shadow: none; }
+
+#mute {
+  position: fixed;
+  right: 14px;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 2;
+  appearance: none;
+  border: 1px solid rgba(243, 245, 249, 0.28);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--silver);
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+#mute:hover { color: var(--light); border-color: var(--light); }
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.82) 78%);
+}
+
+#overlay[hidden] { display: none; }
+
+#overlay-kicker {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.6em;
+  text-transform: uppercase;
+  color: var(--silver);
+  animation: flicker 7s linear infinite;
+}
+
+#overlay[data-state="over"] #overlay-kicker { color: var(--light); text-shadow: var(--glow); }
+
+#overlay h1 {
+  margin: 0;
+  font-size: clamp(40px, 12vw, 104px);
+  font-weight: 200;
+  line-height: 0.92;
+  letter-spacing: 0.16em;
+  /* The spacing trails after the last letter; this puts it back in the middle. */
+  margin-right: -0.16em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow:
+    0 0 6px rgba(255, 255, 255, 0.7),
+    0 0 26px rgba(220, 228, 240, 0.45),
+    0 0 70px rgba(200, 210, 228, 0.3);
+}
+
+#overlay h1 em {
+  display: block;
+  margin-top: 14px;
+  margin-right: -0.7em;
+  font-size: 0.22em;
+  font-style: normal;
+  font-weight: 300;
+  letter-spacing: 0.7em;
+  color: var(--silver);
+  text-shadow: none;
+}
+
+#overlay-lead {
+  margin: 0;
+  max-width: 36ch;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--silver);
+}
+
+#overlay-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 32px;
+  margin: 6px 0 0;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+#overlay-stats[hidden] { display: none; }
+#overlay-stats .stat { display: flex; flex-direction: column; gap: 6px; min-width: 62px; }
+#overlay-stats dt { color: var(--silver); }
+#overlay-stats dd { margin: 0; font-size: 22px; font-weight: 300; font-variant-numeric: tabular-nums; text-shadow: var(--glow); }
+
+#play {
+  appearance: none;
+  margin-top: 12px;
+  padding: 13px 40px;
+  border: 1px solid rgba(243, 245, 249, 0.7);
+  border-radius: 999px;
+  background: rgba(243, 245, 249, 0.06);
+  color: var(--light);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.5em;
+  text-indent: 0.5em;
+  text-transform: uppercase;
+  text-shadow: var(--glow);
+  box-shadow: 0 0 22px rgba(220, 228, 240, 0.12);
+  cursor: pointer;
+}
+#play:hover { background: rgba(243, 245, 249, 0.16); box-shadow: 0 0 30px rgba(220, 228, 240, 0.3); }
+#play:active { transform: translateY(1px); }
+
+#keys {
+  display: flex;
+  gap: 6px 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--ash);
+}
+
+kbd {
+  display: inline-block;
+  min-width: 20px;
+  margin-right: 4px;
+  padding: 2px 5px;
+  border: 1px solid rgba(243, 245, 249, 0.25);
+  border-radius: 3px;
+  font: inherit;
+  font-size: 10px;
+  color: var(--silver);
+}
+
+.touch { display: none; }
+
+/* Mostly steady, and every so often the sky goes off behind it. */
+@keyframes flicker {
+  0%, 61%, 64%, 67%, 100% { opacity: 1; }
+  62%, 66% { opacity: 0.2; }
+}
+
+@media (hover: none) {
+  #keys li:not(.touch) { display: none; }
+  .touch { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #overlay-kicker { animation: none; }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "eggscape-storm",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Eggscape the Storm — a 3D runner under a sky that is coming down in light, starring a rolling egg",
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test \"test/**/*.test.js\"",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.9.1",
+    "globals": "^17.12.0",
+    "jsdom": "^30.0.1",
+    "vite": "^8.2.2"
+  }
+}

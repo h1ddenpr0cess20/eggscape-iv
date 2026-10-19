@@ -1,0 +1,51 @@
+import { Geometry } from '../gpu/geometry.js';
+import { Lines } from '../gpu/graph.js';
+import { BasicMaterial, LineMaterial } from '../gpu/material.js';
+import { THEME } from './theme.js';
+
+const lines = new Map();
+
+/** Line materials are shared — a run makes hundreds of slabs out of four. */
+export function wire(color, opacity = 1) {
+  const key = `${color}:${opacity}`;
+  if (!lines.has(key)) {
+    lines.set(key, new LineMaterial({
+      color,
+      transparent: opacity < 1,
+      opacity,
+      blending: 'additive',
+      depthWrite: false,
+    }));
+  }
+  return lines.get(key);
+}
+
+let fading = null;
+
+/** Lines that carry their own brightness at each end, for light that runs
+ *  out: a drip off a slab, the tail of a falling thing. */
+export function fade() {
+  fading ??= new LineMaterial({
+    vertexColors: true,
+    transparent: true,
+    blending: 'additive',
+    depthWrite: false,
+  });
+  return fading;
+}
+
+/** The black the lines sit on, so the far side of a thing stays hidden. */
+export function fill(color = THEME.void, opacity = 1) {
+  return new BasicMaterial({
+    color,
+    transparent: opacity < 1,
+    opacity,
+    polygonOffset: true,
+    polygonOffsetFactor: 1,
+    polygonOffsetUnits: 1,
+  });
+}
+
+export function segments(positions, material, colors = null) {
+  return new Lines(new Geometry({ position: positions, color: colors }), material);
+}

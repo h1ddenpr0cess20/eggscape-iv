@@ -1,0 +1,45 @@
+import { EGG_HEIGHT } from '../core/shape.js';
+import { PLAYER } from '../core/tuning.js';
+import { Group } from '../gpu/graph.js';
+import { segments, wire } from './materials.js';
+import { createShell } from './shell.js';
+import { THEME } from './theme.js';
+
+/** The shaped shell has its own height; the egg has to fit the collider. */
+export const EGG_SCALE = PLAYER.height / EGG_HEIGHT;
+
+/**
+ * Marc, as he is, in a world that is not. The shell is the asset — same
+ * geometry, same speckled skin, same physical material — and the only thing
+ * added is a cold light on his rim, because the storm is the brightest thing
+ * out here and the shell should admit it.
+ */
+export function createEgg() {
+  const egg = new Group();
+  egg.name = 'egg';
+
+  const shell = createShell();
+
+  const body = new Group();
+  body.name = 'body';
+  body.add(shell.mesh);
+
+  egg.add(body);
+  egg.scale.setScalar(EGG_SCALE);
+
+  return { object: egg, body, shell };
+}
+
+/** The ring the egg casts on whatever it is standing over. */
+export function createShadow(radius = 0.6, points = 32) {
+  const positions = new Float32Array(points * 6);
+  for (let i = 0; i < points; i++) {
+    const a = (i / points) * Math.PI * 2;
+    const b = ((i + 1) / points) * Math.PI * 2;
+    positions.set([
+      Math.cos(a) * radius, 0, Math.sin(a) * radius,
+      Math.cos(b) * radius, 0, Math.sin(b) * radius,
+    ], i * 6);
+  }
+  return segments(positions, wire(THEME.dim, 0.7));
+}
